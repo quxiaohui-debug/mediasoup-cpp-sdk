@@ -259,7 +259,7 @@ namespace mediasoupclient
 				offer = sdptransform::write(localSdpObject);
 			}
 
-			MSC_DEBUG("calling pc->SetLocalDescription():\n%s", offer.c_str());
+			MSC_DEBUG("calling pc->SetLocalDescription():\n%s, type: offer", offer.c_str());
 
 			this->pc->SetLocalDescription(PeerConnection::SdpType::OFFER, offer);
 
@@ -469,7 +469,7 @@ namespace mediasoupclient
 
 		auto offer = this->pc->CreateOffer(options);
 
-		MSC_DEBUG("calling pc->SetLocalDescription():\n%s", offer.c_str());
+		MSC_DEBUG("calling pc->SetLocalDescription():\n%s, type: offer", offer.c_str());
 
 		// May throw.
 		this->pc->SetLocalDescription(PeerConnection::SdpType::OFFER, offer);
@@ -602,7 +602,7 @@ namespace mediasoupclient
 		// May throw.
 		auto offer = this->pc->CreateOffer(options);
 
-		MSC_DEBUG("calling pc->SetLocalDescription():\n%s", offer.c_str());
+		MSC_DEBUG("calling pc->SetLocalDescription():\n%s, type: offer", offer.c_str());
 
 		// May throw.
 		this->pc->SetLocalDescription(PeerConnection::SdpType::OFFER, offer);
@@ -680,7 +680,7 @@ namespace mediasoupclient
 			this->SetupTransport(
 			  !this->forcedLocalDtlsRole.empty() ? this->forcedLocalDtlsRole : "client", localSdpObject);
 
-		MSC_DEBUG("calling pc->SetLocalDescription():\n%s", answer.c_str());
+		MSC_DEBUG("calling pc->SetLocalDescription():\n%s, type: answer", answer.c_str());
 
 		// May throw.
 		this->pc->SetLocalDescription(PeerConnection::SdpType::ANSWER, answer);
@@ -796,7 +796,7 @@ namespace mediasoupclient
 		// May throw.
 		auto answer = this->pc->CreateAnswer(options);
 
-		MSC_DEBUG("calling pc->SetLocalDescription():\n%s", answer.c_str());
+		MSC_DEBUG("calling pc->SetLocalDescription():\n%s, type: answer", answer.c_str());
 
 		// May throw.
 		this->pc->SetLocalDescription(PeerConnection::SdpType::ANSWER, answer);
@@ -843,7 +843,7 @@ namespace mediasoupclient
 		// May throw.
 		auto answer = this->pc->CreateAnswer(options);
 
-		MSC_DEBUG("calling pc->SetLocalDescription():\n%s", answer.c_str());
+		MSC_DEBUG("calling pc->SetLocalDescription():\n%s, type: answer", answer.c_str());
 
 		// May throw.
 		this->pc->SetLocalDescription(PeerConnection::SdpType::ANSWER, answer);
