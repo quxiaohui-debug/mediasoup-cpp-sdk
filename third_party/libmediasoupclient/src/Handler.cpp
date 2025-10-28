@@ -653,7 +653,7 @@ namespace mediasoupclient
 
 		auto offer = this->remoteSdp->GetSdp();
 
-		MSC_DEBUG("calling pc->setRemoteDescription():\n%s", offer.c_str());
+		MSC_DEBUG("calling pc->setRemoteDescription():\n%s, type: offer", offer.c_str());
 
 		// May throw.
 		this->pc->SetRemoteDescription(PeerConnection::SdpType::OFFER, offer);
@@ -786,7 +786,7 @@ namespace mediasoupclient
 
 		auto offer = this->remoteSdp->GetSdp();
 
-		MSC_DEBUG("calling pc->setRemoteDescription():\n%s", offer.c_str());
+		MSC_DEBUG("calling pc->setRemoteDescription():\n%s, type: offer", offer.c_str());
 
 		// May throw.
 		this->pc->SetRemoteDescription(PeerConnection::SdpType::OFFER, offer);
@@ -833,7 +833,7 @@ namespace mediasoupclient
 
 		auto offer = this->remoteSdp->GetSdp();
 
-		MSC_DEBUG("calling pc->setRemoteDescription():\n%s", offer.c_str());
+		MSC_DEBUG("calling pc->setRemoteDescription():\n%s, type: offer", offer.c_str());
 
 		// May throw.
 		this->pc->SetRemoteDescription(PeerConnection::SdpType::OFFER, offer);
