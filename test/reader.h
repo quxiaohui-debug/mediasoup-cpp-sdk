@@ -40,6 +40,31 @@ private:
   int64_t _lastFrameMillis;
 };
 
+// | 类型 | 值            |含义 |
+// | --- | ------------- | -- |
+// | 32  | VPS           |    |
+// | 33  | SPS           |    |
+// | 34  | PPS           |    |
+// | 19  | IDR (CRA Pic) |    |
+// | 20  | IDR (IDR Pic) |    |
+// | 1–9 | P/B 帧        |    |
+class H265Reader : public Reader {
+public:
+  H265Reader(std::string path, uint32_t fps);
+  ~H265Reader();
+  virtual void RunLoop() override;
+
+private:
+  void ReadOneNalu();
+
+private:
+  uint32_t m_fps;
+  int64_t _lastFrameMillis;
+  std::string m_vps;
+  std::string m_sps;
+  std::string m_pps;
+};
+
 class PCMReader : public Reader {
 public:
   PCMReader(std::string path, int frameInterval, int frameSize);

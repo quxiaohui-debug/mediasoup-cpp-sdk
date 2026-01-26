@@ -169,6 +169,166 @@ void H264Reader::ReadOneNalu() {
   }
 }
 
+H265Reader::H265Reader(std::string path, uint32_t fps)
+    : Reader(path), m_fps(fps) {
+  _lastFrameMillis = 0;
+}
+
+H265Reader::~H265Reader() {}
+
+void H265Reader::RunLoop() {
+  while (m_bStart) {
+    int64_t currentTime = rtc::TimeMillis();
+
+    if (_lastFrameMillis == 0 ||
+        currentTime - _lastFrameMillis >= 1000 / m_fps) {
+      ReadOneNalu();
+      _lastFrameMillis = currentTime;
+    }
+
+    int64_t deltaTimeMillis = rtc::TimeMillis() - currentTime;
+    if (deltaTimeMillis < 1000 / m_fps) {
+      webrtc::SleepMs(1000 / m_fps - deltaTimeMillis);
+    }
+  }
+}
+
+void H265Reader::ReadOneNalu() {
+  int index = 0;
+  std::string data;
+  bool bStop = false;
+
+  while (!bStop) {
+    int ch = fgetc(m_fp);
+    if (ch == EOF) {
+      fprintf(stdout, "end of file\r\n");
+      fseek(m_fp, 0, SEEK_SET);
+      continue;
+    }
+
+    if (index >= MAX_BUFFER_SIZE - 1) {
+      index = 0;
+      continue;
+    }
+
+    m_buf[index] = ch;
+
+    if (index >= 3 && m_buf[index] == 0x01 && m_buf[index - 1] == 0x00 &&
+        m_buf[index - 2] == 0x00 && m_buf[index - 3] == 0x00) {
+
+      int nal_type = (m_buf[0] >> 1) & 0x3F;
+      switch (nal_type) {
+      case 32:
+        m_vps =
+            std::string(start_code_4_bytes, 4) + std::string(m_buf, index - 3);
+        fprintf(stdout, "vps, nalu type: %d\r\n", nal_type);
+        break;
+      case 33:
+        m_sps =
+            std::string(start_code_4_bytes, 4) + std::string(m_buf, index - 3);
+        fprintf(stdout, "sps, nalu type: %d\r\n", nal_type);
+        break;
+      case 34:
+        m_pps =
+            std::string(start_code_4_bytes, 4) + std::string(m_buf, index - 3);
+        fprintf(stdout, "pps, nalu type: %d\r\n", nal_type);
+        break;
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+        data =
+            std::string(start_code_4_bytes, 4) + std::string(m_buf, index - 3);
+        bStop = true;
+        fprintf(stdout, "p frame, nalu type: %d\r\n", nal_type);
+        break;
+      case 16:
+      case 17:
+      case 18:
+      case 19:
+      case 20:
+      case 21:
+        data =
+            std::string(start_code_4_bytes, 4) + std::string(m_buf, index - 3);
+        data = m_vps + m_sps + m_pps + data;
+        bStop = true;
+        fprintf(stdout, "i frame, nalu type: %d\r\n", nal_type);
+        break;
+      default:
+        break;
+      }
+      if (m_cb && !data.empty())
+        m_cb(data.data(), data.size());
+      index = 0;
+      continue;
+    }
+
+    if (index >= 2 && m_buf[index] == 0x01 && m_buf[index - 1] == 0x00 &&
+        m_buf[index - 2] == 0x00) {
+      int nal_type = (m_buf[0] >> 1) & 0x3F;
+      switch (nal_type) {
+      case 32:
+        m_vps =
+            std::string(start_code_3_bytes, 3) + std::string(m_buf, index - 2);
+        fprintf(stdout, "vps, nalu type: %d\r\n", nal_type);
+        break;
+      case 33:
+        m_sps =
+            std::string(start_code_3_bytes, 3) + std::string(m_buf, index - 2);
+        fprintf(stdout, "sps, nalu type: %d\r\n", nal_type);
+        break;
+      case 34:
+        m_pps =
+            std::string(start_code_3_bytes, 3) + std::string(m_buf, index - 2);
+        fprintf(stdout, "pps, nalu type: %d\r\n", nal_type);
+        break;
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+        data =
+            std::string(start_code_3_bytes, 3) + std::string(m_buf, index - 2);
+        bStop = true;
+        fprintf(stdout, "p frame, nalu type: %d\r\n", nal_type);
+        break;
+      case 16:
+      case 17:
+      case 18:
+      case 19:
+      case 20:
+      case 21:
+        data =
+            std::string(start_code_3_bytes, 3) + std::string(m_buf, index - 2);
+        data = m_vps + m_sps + m_pps + data;
+        bStop = true;
+        fprintf(stdout, "i frame, nalu type: %d\r\n", nal_type);
+        break;
+      default:
+        break;
+      }
+
+      if (m_cb && !data.empty())
+        m_cb(data.data(), data.size());
+      index = 0;
+      continue;
+    }
+
+    index++;
+  }
+}
+
 PCMReader::PCMReader(std::string path, int frameInterval, int frameSize)
     : Reader(path) {
   m_frameInterval = frameInterval;
