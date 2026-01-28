@@ -135,7 +135,7 @@ void H264Reader::ReadOneNalu() {
         m_cb(data.data(), data.size());
       }
       index = 0;
-    } else if (index > 3 && m_buf[index] == 0x01 && m_buf[index - 1] == 0x00 &&
+    } else if (index >= 2 && m_buf[index] == 0x01 && m_buf[index - 1] == 0x00 &&
                m_buf[index - 2] == 0x00) {
       switch (m_buf[0] & 0x1F) {
       case 1:
